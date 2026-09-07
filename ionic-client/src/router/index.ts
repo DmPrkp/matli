@@ -2,12 +2,18 @@ import { createRouter, createWebHistory } from "@ionic/vue-router";
 import { RouteRecordRaw } from "vue-router";
 import { useHead } from "@vueuse/head";
 import { Locale } from "@/types";
+import {
+  DEFAULT_LOCALE,
+  normalizeLocale,
+  resolveInitialLocale,
+  setI18nLocale,
+} from "@/plugins/i18n";
 import { defaultKeys, routeMeta } from "./constants";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: `/${import.meta.env.VITE_RU_LOCALE}/main`,
+    redirect: () => `/${resolveInitialLocale()}/main`,
   },
   {
     path: "/:locale",
@@ -87,11 +93,27 @@ const router = createRouter({
   routes,
 });
 
+/**
+ * Локаль живёт в URL (/:locale/...). Гвард догружает нужный словарь и
+ * синхронизирует локаль с i18n, а неизвестный сегмент заменяет на поддерживаемый.
+ */
+router.beforeEach(async (to) => {
+  const locale = normalizeLocale(to.params.locale);
+
+  if (!locale) {
+    const fallback = resolveInitialLocale();
+    const segments = to.fullPath.split("/");
+    segments[1] = fallback;
+    return segments.join("/") || `/${fallback}/main`;
+  }
+
+  await setI18nLocale(locale);
+  return true;
+});
+
 router.afterEach((to) => {
-  const locale =
-    ((Array.isArray(to.params.locale)
-      ? to.params.locale[0]
-      : to.params.locale) as Locale) || "ru";
+  const locale = (normalizeLocale(to.params.locale) ||
+    DEFAULT_LOCALE) as Locale;
 
   const currentRoute = to.path.split("/").slice(2, 5).join("/");
   const keywords =

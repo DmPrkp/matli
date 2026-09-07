@@ -20,6 +20,7 @@
         </router-link>
 
         <ion-buttons slot="end">
+          <LocaleSwitch />
           <ThemeSwitch />
           <ion-back-button
             v-if="route.matched.length > 2"
@@ -52,6 +53,7 @@
     IonBackButton,
   } from "@ionic/vue";
   import ThemeSwitch from "@/components/logicalSwitchers/ThemeSwitch.vue";
+  import LocaleSwitch from "@/components/logicalSwitchers/LocaleSwitch.vue";
   import FooterBar from "@/components/nav/FooterBar.vue";
   import injectI18nToRoute from "@/mixins/injectI18nToRoute";
   import { usePreloader } from "./store/preloader";

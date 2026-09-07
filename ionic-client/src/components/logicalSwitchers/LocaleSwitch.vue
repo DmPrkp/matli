@@ -1,88 +1,56 @@
 <template>
-  <select
-    name="locale"
-    @change="(event: any) => setLocale(event.target.value)"
+  <ion-button
+    :aria-label="`Language: ${locale}`"
+    @click="switchLocale"
   >
-    <option
-      v-for="sLocale in availableLocales"
-      :key="sLocale"
-      :value="sLocale"
-      :selected="locale === sLocale"
-    >
-      {{ sLocale }}
-    </option>
-  </select>
+    <ion-icon
+      slot="start"
+      :icon="languageOutline"
+    />
+    <span class="locale_code">{{ locale.toUpperCase() }}</span>
+  </ion-button>
 </template>
 
 <script setup lang="ts">
-  import { useI18n } from "vue-i18n";
-  import { onMounted, watch } from "vue";
-  import { useRouter, useRoute } from "vue-router";
-  import i18n from "@/plugins/i18n";
+  import { IonButton, IonIcon } from "@ionic/vue";
+  import { languageOutline } from "ionicons/icons";
+  import { computed } from "vue";
+  import { useRoute, useRouter } from "vue-router";
+  import { Locale } from "@/types";
+  import {
+    SUPPORTED_LOCALES,
+    normalizeLocale,
+    resolveInitialLocale,
+  } from "@/plugins/i18n";
 
-  const router = useRouter();
   const route = useRoute();
-  const { locale } = useI18n();
-  const defaultLocale = import.meta.env.VITE_DEFAULT_LOCALE;
-  type LocaleTypes = "en" | "ru";
+  const router = useRouter();
 
-  function getAvailableLocales() {
-    // const envs = import.meta.env;
-    // return Object.keys(envs)
-    //   .filter((key: any) => new RegExp("LOCAL").test(key))
-    //   .map((env: any) => envs[env]);
-    return [];
-  }
-
-  function setLocale(value: LocaleTypes) {
-    i18n.global.locale.value = value;
-    document
-      .querySelector("html")
-      ?.setAttribute("lang", i18n.global.locale.value);
-    localStorage.setItem("user-locale", i18n.global.locale.value);
-    if (route.name && value !== route.params.locale) {
-      if (route.fullPath === "/") {
-        router.push({
-          name: "home",
-          params: { locale: value },
-        });
-      } else router.push({ params: { locale: value } });
-    }
-  }
-
-  function getUserLocale() {
-    const persistLocale = localStorage.getItem("user-locale");
-    return persistLocale || window.navigator.language || defaultLocale;
-  }
-
-  function handleLocale(locale: LocaleTypes, availableLocales: string[]) {
-    const localeNoRegion = locale.split("-")[0] as LocaleTypes;
-    if (availableLocales.includes(locale)) {
-      setLocale(locale);
-    } else if (availableLocales.includes(localeNoRegion)) {
-      setLocale(localeNoRegion);
-    } else {
-      setLocale(defaultLocale);
-    }
-  }
-
-  const availableLocales = getAvailableLocales();
-
-  watch(
-    () => route.fullPath,
-    (newVal, oldVal) => {
-      if (
-        route.params.locale &&
-        route.params.locale.constructor === String &&
-        oldVal === "/"
-      ) {
-        handleLocale(route?.params?.locale as LocaleTypes, availableLocales);
-      }
-    }
+  const locale = computed<Locale>(
+    () => normalizeLocale(route.params.locale) || resolveInitialLocale()
   );
 
-  onMounted(() => {
-    const userLocale = getUserLocale();
-    handleLocale(userLocale, availableLocales);
+  const nextLocale = computed<Locale>(() => {
+    const index = SUPPORTED_LOCALES.indexOf(locale.value);
+    return SUPPORTED_LOCALES[(index + 1) % SUPPORTED_LOCALES.length];
   });
+
+  /**
+   * Локаль — часть URL, поэтому меняем сегмент пути. Словарь догрузит и
+   * применит гвард роутера, так что переход дождётся нужного языка.
+   */
+  function switchLocale() {
+    const value = nextLocale.value;
+    const segments = route.fullPath.split("/");
+    segments[1] = value;
+    router.replace(segments.join("/") || `/${value}/main`);
+  }
 </script>
+
+<style scoped>
+  .locale_code {
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+</style>
