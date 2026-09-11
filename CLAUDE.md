@@ -66,7 +66,9 @@ user-server дополнительно читает `JWT_SECRET` (без нег�
 Проверить типы клиента без сборки: `npx vue-tsc --noEmit` в `ionic-client/`.
 
 CI (`.github/workflows/test.yml`) гоняет на Node 22 order-server и ionic-client;
-e2e клиента там закомментированы. Деплой — rsync + `compose.prod.yaml` на пуш в `main`.
+e2e клиента там закомментированы. Деплой — `./deploy.sh` из локальной сети (сервер
+`192.168.1.49:22`): заливает закоммиченный `HEAD` через `git archive` и пересобирает
+`compose.prod.yaml`. `deploy.yml` в Actions оставлен только на ручной запуск.
 
 ## Архитектура
 

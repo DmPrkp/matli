@@ -1,9 +1,9 @@
 name: Deploy to Remote Server
 
+# Основной деплой — ./deploy.sh из локальной сети. Отсюда только вручную,
+# если снаружи снова откроют SSH до сервера.
 on:
-  push:
-    branches:
-      - main # Trigger on pushes to the main branch
+  workflow_dispatch:
 
 jobs:
   deploy:
