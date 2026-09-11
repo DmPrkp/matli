@@ -1,4 +1,4 @@
 .idea
 /secrets
 /calc-server/*
-deploy.sh
+/deploy.sh
