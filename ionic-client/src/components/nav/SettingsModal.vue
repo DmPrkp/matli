@@ -53,12 +53,12 @@
               </ion-label>
             </ion-item>
           </ion-list>
-          <PlasmaButton
+          <CutCornerBtn
             class="logout_btn"
             @click="handleLogout"
           >
             {{ $t("pages.settings.logout") }}
-          </PlasmaButton>
+          </CutCornerBtn>
         </ion-card-content>
       </ion-card>
     </ion-content>
@@ -84,7 +84,7 @@
   import { useRoute, useRouter } from "vue-router";
   import LocaleSwitch from "@/components/logicalSwitchers/LocaleSwitch.vue";
   import ThemeSwitch from "@/components/logicalSwitchers/ThemeSwitch.vue";
-  import PlasmaButton from "@/components/ui/PlasmaButton.vue";
+  import CutCornerBtn from "@/components/ui/CutCornerBtn.vue";
   import { useAuthStore } from "@/store/auth";
 
   defineProps<{ isOpen: boolean }>();
