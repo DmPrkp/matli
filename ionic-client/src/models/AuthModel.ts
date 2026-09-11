@@ -1,5 +1,5 @@
 import BaseModel from './BaseModel';
-import type { AuthResponse } from '@/types/dto/auth';
+import type { AuthResponse, RegisterPayload } from '@/types/dto/auth';
 
 const DEFAULT_AUTH_PREFIX = '/user/api/v1';
 
@@ -25,17 +25,15 @@ const userApiPrefix =
   DEFAULT_AUTH_PREFIX;
 
 const loginPaths = parsePaths(import.meta.env.VITE_USER_API_LOGIN_PATHS, [
-  '/auth/log-in',
+  '/auth/login',
 ]);
 
 const registerPaths = parsePaths(import.meta.env.VITE_USER_API_REGISTER_PATHS, [
-  '/auth/sign-in',
+  '/auth/register',
 ]);
 
 const profilePaths = parsePaths(import.meta.env.VITE_USER_API_PROFILE_PATHS, [
-  '/profile',
-  '/auth/profile',
-  '/users/me',
+  '/auth/me',
 ]);
 
 const credentialsEnv = import.meta.env.VITE_USER_API_CREDENTIALS;
@@ -89,18 +87,15 @@ export default class AuthModel extends BaseModel {
     return undefined;
   }
 
-  static login(email: string, password: string) {
+  static login(login: string, password: string) {
     return this.postWithFallback(loginPaths, {
-      email,
+      login,
       password,
     });
   }
 
-  static register(email: string, password: string) {
-    return this.postWithFallback(registerPaths, {
-      email,
-      password,
-    });
+  static register(payload: RegisterPayload) {
+    return this.postWithFallback(registerPaths, { ...payload });
   }
 
   static profile() {

@@ -8,6 +8,7 @@ import {
   resolveInitialLocale,
   setI18nLocale,
 } from "@/plugins/i18n";
+import { normalizeCatalogTab } from "@/constants";
 import { defaultKeys, routeMeta } from "./constants";
 
 const routes: Array<RouteRecordRaw> = [
@@ -23,6 +24,28 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
+        // Сборники устроены как главная: плитка разделов, каждый — свой адрес.
+        path: "catalog",
+        name: "catalog",
+        component: () => import("@/pages/CatalogPage.vue"),
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: ":tab",
+            name: "catalog-section",
+            component: () => import("@/pages/CatalogSectionPage.vue"),
+            meta: { requiresAuth: true },
+            // Неизвестный раздел в адресе -> обратно в меню сборников.
+            beforeEnter: (to) =>
+              normalizeCatalogTab(to.params.tab)
+                ? true
+                : { name: "catalog", params: { locale: to.params.locale } },
+          },
+        ],
+      },
+      {
+        // Из нижнего меню убрана в пользу «сборников», но роут оставлен —
+        // страница доступна по прямой ссылке.
         path: "about",
         name: "about",
         component: () => import("@/pages/AboutPage.vue"),
@@ -79,10 +102,17 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
-        path: "settings",
-        name: "settings",
-        component: () => import("@/pages/SettingsPage.vue"),
+        // Пока заглушка: раздел заведён в нижнем меню заранее.
+        path: "warehouses",
+        name: "warehouses",
+        component: () => import("@/pages/WarehousesPage.vue"),
         meta: { requiresAuth: true },
+      },
+      {
+        // Настройки теперь модалка из аватара в шапке, а не страница. Адрес
+        // оставлен редиректом: /ru/settings был в sitemap и мог осесть в закладках.
+        path: "settings",
+        redirect: (to) => `/${to.params.locale}/main`,
       },
     ],
   },

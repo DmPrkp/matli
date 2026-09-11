@@ -1,10 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { compare, hash } from 'bcryptjs';
+import { hashPassword, verifyPassword } from '../users/password';
+import { toPublicUser } from '../users/public-user';
 import { UsersService } from '../users/users.service';
-import { LogInDto } from './dto/log-in.dto';
-import { SignInDto } from './dto/sign-in.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { JwtPayload } from './jwt-payload';
 
 @Injectable()
 export class AuthService {
@@ -13,42 +16,44 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(dto: SignInDto) {
-    const hashedPassword = await hash(dto.password, 10);
-    const user = await this.usersService.createUser({
-      email: dto.email,
-      name: dto.name ?? null,
-      password: hashedPassword,
+  // Роль при регистрации не принимается — только USER по умолчанию из схемы.
+  async register(dto: RegisterDto) {
+    const user = await this.usersService.create({
+      login: dto.login,
+      password: await hashPassword(dto.password),
+      firstName: dto.firstName,
+      lastName: dto.lastName || null,
     });
 
     return this.buildAuthResponse(user);
   }
 
-  async logIn(dto: LogInDto) {
-    const user = await this.usersService.findByEmail(dto.email);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const passwordMatch = await compare(dto.password, user.password);
-    if (!passwordMatch) {
-      throw new UnauthorizedException('Invalid credentials');
+  async login(dto: LoginDto) {
+    const user = await this.usersService.findByLogin(dto.login);
+    const passwordMatch = await verifyPassword(dto.password, user?.password);
+    if (!user || !passwordMatch) {
+      throw new UnauthorizedException('Invalid login or password');
     }
 
     return this.buildAuthResponse(user);
   }
 
+  async changePassword(userId: number, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.usersService.findById(userId);
+    // 403, а не 401: сессия-то валидна, и клиент не должен принять это за протухший токен.
+    if (!user || !(await verifyPassword(dto.currentPassword, user.password))) {
+      throw new ForbiddenException('Current password is incorrect');
+    }
+
+    await this.usersService.updatePassword(user.id, await hashPassword(dto.newPassword));
+  }
+
   private buildAuthResponse(user: User) {
-    const payload = { sub: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(payload);
+    const payload: JwtPayload = { sub: user.id, login: user.login, role: user.role };
 
     return {
-      accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
+      accessToken: this.jwtService.sign(payload),
+      user: toPublicUser(user),
     };
   }
 }

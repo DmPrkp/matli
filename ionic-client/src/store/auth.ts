@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import AuthModel from '@/models/AuthModel';
 import BaseModel from '@/models/BaseModel';
-import type { AuthResponse, UserProfile } from '@/types/dto';
+import type { AuthResponse, RegisterPayload, UserProfile } from '@/types/dto';
 
 const TOKEN_STORAGE_KEY = 'mr-auth-token';
 
@@ -161,10 +161,16 @@ const normalizeUserProfile = (payload: unknown): UserProfile | null => {
     USER_UPDATED_KEYS.map((key) => candidate[key]).find((value) => value !== undefined)
   );
 
+  const optionalString = (value: unknown) =>
+    typeof value === 'string' && value.trim() ? value.trim() : undefined;
+
   return {
     id: identifier,
     email,
     username,
+    firstName: optionalString(candidate.firstName),
+    lastName: optionalString(candidate.lastName),
+    role: optionalString(candidate.role),
     createdAt,
     updatedAt,
   };
@@ -218,11 +224,11 @@ export const useAuthStore = defineStore('auth', {
     clearError() {
       this.error = null;
     },
-    async login(email: string, password: string) {
+    async login(login: string, password: string) {
       this.status = 'loading';
       this.clearError();
       try {
-        const response = await AuthModel.login(email, password);
+        const response = await AuthModel.login(login, password);
         this.applyAuthResponse(response);
         await this.fetchProfile();
       } catch (error) {
@@ -236,16 +242,16 @@ export const useAuthStore = defineStore('auth', {
         }
       }
     },
-    async register(email: string, password: string) {
+    async register(payload: RegisterPayload) {
       this.status = 'loading';
       this.clearError();
       try {
-        const response = await AuthModel.register(email, password);
+        const response = await AuthModel.register(payload);
         try {
           this.applyAuthResponse(response);
         } catch (error) {
           if (error instanceof MissingTokenError) {
-            const loginResponse = await AuthModel.login(email, password);
+            const loginResponse = await AuthModel.login(payload.login, payload.password);
             this.applyAuthResponse(loginResponse);
           } else {
             throw error;

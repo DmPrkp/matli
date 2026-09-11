@@ -81,4 +81,14 @@ export type StoredMaterialRequestDTO = {
   id: number;
 };
 
-export type { AuthResponse, UserProfile } from './auth';
+export type { AuthResponse, RegisterPayload, UserProfile } from './auth';
+export type {
+  DictionaryPage,
+  DictionaryUnit,
+  DictionaryMaterial,
+  DictionaryMaterialType,
+  DictionaryHandTool,
+  DictionaryPowerTool,
+  DictionaryVariant,
+  DictionaryVariantParam,
+} from './dictionary';

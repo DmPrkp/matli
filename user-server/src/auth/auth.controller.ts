@@ -1,19 +1,36 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { PublicUser } from '../users/public-user';
 import { AuthService } from './auth.service';
-import { LogInDto } from './dto/log-in.dto';
-import { SignInDto } from './dto/sign-in.dto';
+import { CurrentUser, Public } from './decorators';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('sign-in')
-  async signIn(@Body() dto: SignInDto) {
-    return this.authService.signIn(dto);
+  @Public()
+  @Post('register')
+  register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
-  @Post('log-in')
-  async logIn(@Body() dto: LogInDto) {
-    return this.authService.logIn(dto);
+  @Public()
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
+  }
+
+  @Get('me')
+  me(@CurrentUser() user: PublicUser) {
+    return user;
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  changePassword(@CurrentUser() user: PublicUser, @Body() dto: ChangePasswordDto) {
+    return this.authService.changePassword(user.id, dto);
   }
 }

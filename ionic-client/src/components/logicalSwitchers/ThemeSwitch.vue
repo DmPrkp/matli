@@ -1,44 +1,24 @@
 <template>
-  <ion-button @click="toggleTheme">
-    <ion-icon :icon="isDarkMode ? sunnyOutline : moonOutline"></ion-icon>
-  </ion-button>
+  <ion-item lines="none">
+    <ion-toggle
+      :checked="isDark"
+      @ionChange="onToggle"
+    >
+      {{ $t("pages.settings.theme") }}
+    </ion-toggle>
+  </ion-item>
 </template>
 
 <script setup lang="ts">
-  import { IonIcon } from "@ionic/vue";
-  import { sunnyOutline, moonOutline } from "ionicons/icons";
-  import { onBeforeMount, ref } from "vue";
-  import Cookies from "js-cookie";
+  import { ref } from "vue";
+  import { currentTheme, setTheme } from "@/plugins/theme";
 
-  const isDarkMode = ref(false);
-  const MODE = {
-    dark: "dark",
-    light: "light",
-  };
+  // Тему на старте ставит applyInitialTheme() в main.ts — здесь только читаем.
+  const isDark = ref(currentTheme() === "dark");
 
-  const toggleTheme = (value: boolean | undefined) => {
-    if (typeof value !== "boolean") value = !isDarkMode.value;
-    isDarkMode.value = value;
-    document.body.classList.toggle(MODE.dark, isDarkMode.value);
-    Cookies.set("theme_mode", value ? MODE.dark : MODE.light, {
-      expires: 365,
-    });
-  };
-
-  onBeforeMount(() => {
-    checkMode();
-  });
-
-  function checkMode() {
-    const mode = Cookies.get("theme_mode");
-
-    if (mode) {
-      toggleTheme(mode === MODE.dark);
-      return;
-    }
-
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      toggleTheme(true);
-    }
+  function onToggle(event: CustomEvent) {
+    const checked = (event.detail as { checked: boolean }).checked;
+    isDark.value = checked;
+    setTheme(checked ? "dark" : "light");
   }
 </script>

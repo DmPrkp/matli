@@ -1,0 +1,14 @@
+FROM node:22-alpine
+
+WORKDIR /usr/dictionary-server
+
+COPY package*.json ./
+RUN npm install
+
+COPY ./ ./
+
+EXPOSE 4300
+
+# push синхронизирует схему из src/db/schema.ts прямо в БД — режим прототипа.
+# Когда справочник устаканится: npm run db:generate + drizzle-kit migrate.
+CMD ["sh", "-c", "npx drizzle-kit push --force && npm run db:seed && npm run start:dev"]

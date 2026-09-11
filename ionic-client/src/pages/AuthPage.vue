@@ -22,16 +22,38 @@
             <ion-list>
               <ion-item>
                 <ion-label position="stacked">
-                  {{ $t("pages.auth.email") }}
+                  {{ $t("pages.auth.username") }}
                 </ion-label>
                 <ion-input
-                  v-model="email"
-                  autocomplete="email"
-                  inputmode="email"
-                  type="email"
+                  v-model="login"
+                  autocomplete="username"
+                  autocapitalize="off"
                   required
                 />
               </ion-item>
+
+              <template v-if="mode === 'register'">
+                <ion-item>
+                  <ion-label position="stacked">
+                    {{ $t("pages.auth.first_name") }}
+                  </ion-label>
+                  <ion-input
+                    v-model="firstName"
+                    autocomplete="given-name"
+                    required
+                  />
+                </ion-item>
+
+                <ion-item>
+                  <ion-label position="stacked">
+                    {{ $t("pages.auth.last_name") }}
+                  </ion-label>
+                  <ion-input
+                    v-model="lastName"
+                    autocomplete="family-name"
+                  />
+                </ion-item>
+              </template>
 
               <ion-item>
                 <ion-label position="stacked">
@@ -40,8 +62,10 @@
                 <ion-input
                   v-model="password"
                   type="password"
-                  autocomplete="current-password"
-                  :minlength="6"
+                  :autocomplete="
+                    mode === 'register' ? 'new-password' : 'current-password'
+                  "
+                  :minlength="mode === 'register' ? 6 : undefined"
                   required
                 />
               </ion-item>
@@ -123,7 +147,9 @@
   const { t } = useI18n();
 
   const mode = ref<AuthMode>("login");
-  const email = ref<string>("");
+  const login = ref<string>("");
+  const firstName = ref<string>("");
+  const lastName = ref<string>("");
   const password = ref<string>("");
   const confirmPassword = ref<string>("");
   const isSubmitting = computed(() => authStore.status === "loading");
@@ -159,9 +185,14 @@
         if (password.value !== confirmPassword.value) {
           throw new Error(t("pages.auth.password_mismatch"));
         }
-        await authStore.register(email.value, password.value);
+        await authStore.register({
+          login: login.value,
+          password: password.value,
+          firstName: firstName.value,
+          lastName: lastName.value.trim() || undefined,
+        });
       } else {
-        await authStore.login(email.value, password.value);
+        await authStore.login(login.value, password.value);
       }
 
       const redirect =
@@ -172,7 +203,9 @@
             }/main`;
 
       router.replace(redirect);
-      email.value = "";
+      login.value = "";
+      firstName.value = "";
+      lastName.value = "";
       password.value = "";
       confirmPassword.value = "";
     } catch (error) {

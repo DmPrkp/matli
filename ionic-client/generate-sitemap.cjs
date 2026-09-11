@@ -3,6 +3,17 @@
 const fs = require("fs");
 const path = require("path");
 const routes = [
+  // Сборники: меню разделов и сами разделы — каждый по своему адресу.
+  // Список детей должен совпадать с CATALOG_TABS из src/constants/catalog.ts.
+  {
+    path: "ru/catalog",
+    name: "catalog",
+    children: [
+      { path: "materials" },
+      { path: "hand_tools" },
+      { path: "power_tools" },
+    ],
+  },
   {
     path: "ru/about",
     name: "about",
@@ -27,10 +38,6 @@ const routes = [
   {
     path: "ru/zayavka",
     name: "zayavka-list",
-  },
-  {
-    path: "ru/settings",
-    name: "settings",
   },
 ];
 

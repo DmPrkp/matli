@@ -1,51 +1,43 @@
 <template>
-  <div>
-    <button class="custom-btn btn">
-      Read More2
-      <div class="dot"></div>
-    </button>
-  </div>
+  <!--
+    <button> корневой, без обёртки: type, disabled и @click родителя Vue вешает
+    на корень, и с div-обёрткой они уходили бы на неё, а не на кнопку.
+  -->
+  <button
+    class="plasma_btn"
+    type="button"
+  >
+    <slot />
+  </button>
 </template>
-<script>
-  export default {};
-</script>
+
 <style scoped>
-  button {
-    margin: 20px;
-  }
-  .custom-btn {
-    width: 130px;
-    height: 40px;
-    color: #fff;
-    border-radius: 5px;
-    padding: 10px 25px;
-    font-family: "Lato", sans-serif;
-    font-weight: 500;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  .plasma_btn {
     position: relative;
     display: inline-block;
-    box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, 0.5),
-      7px 7px 20px 0px rgba(0, 0, 0, 0.1), 4px 4px 5px 0px rgba(0, 0, 0, 0.1);
-    outline: none;
-  }
-  .btn {
+    min-width: 130px;
+    height: 40px;
+    padding: 0 25px;
     border: none;
-    background: rgb(255, 255, 255);
+    border-radius: 5px;
+    overflow: hidden;
+    color: #fff;
+    font-family: "Lato", sans-serif;
+    font-weight: 500;
     background: radial-gradient(
       circle,
       rgba(247, 150, 192, 1) 0%,
       rgba(118, 174, 241, 1) 100%
     );
-    color: #fff;
-    overflow: hidden;
+    box-shadow:
+      inset 2px 2px 2px 0px rgba(255, 255, 255, 0.5),
+      7px 7px 20px 0px rgba(0, 0, 0, 0.1),
+      4px 4px 5px 0px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
   }
-  .btn:hover {
-    text-decoration: none;
-    color: #fff;
-  }
-  .btn:before {
+
+  .plasma_btn:before {
     position: absolute;
     content: "";
     display: inline-block;
@@ -56,31 +48,45 @@
     background-color: #fff;
     animation: shiny-btn 5s ease-in-out infinite;
   }
-  .btn:hover {
+
+  .plasma_btn:hover {
     opacity: 0.7;
   }
-  .btn:active {
-    box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, 0.3),
+
+  .plasma_btn:active {
+    box-shadow:
+      4px 4px 6px 0 rgba(255, 255, 255, 0.3),
       -4px -4px 6px 0 rgba(116, 125, 136, 0.2),
       inset -4px -4px 6px 0 rgba(255, 255, 255, 0.2),
       inset 4px 4px 6px 0 rgba(0, 0, 0, 0.2);
   }
 
-  @-webkit-keyframes shiny-btn {
+  /* outline: none без замены оставлял клавиатуру без видимого фокуса. */
+  .plasma_btn:focus-visible {
+    outline: 2px solid rgba(118, 174, 241, 1);
+    outline-offset: 2px;
+  }
+
+  .plasma_btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  @keyframes shiny-btn {
     0% {
-      -webkit-transform: scale(0) rotate(45deg);
+      transform: scale(0) rotate(45deg);
       opacity: 0;
     }
     80% {
-      -webkit-transform: scale(0) rotate(45deg);
+      transform: scale(0) rotate(45deg);
       opacity: 0.5;
     }
     81% {
-      -webkit-transform: scale(4) rotate(45deg);
+      transform: scale(4) rotate(45deg);
       opacity: 1;
     }
     100% {
-      -webkit-transform: scale(50) rotate(45deg);
+      transform: scale(50) rotate(45deg);
       opacity: 0;
     }
   }

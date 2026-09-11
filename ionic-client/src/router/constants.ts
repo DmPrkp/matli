@@ -6,6 +6,30 @@ const defaultKeys = {
 };
 
 const routeMeta: Keys = {
+  catalog: {
+    key: {
+      en: "Catalogs: materials, hand and power tools",
+      ru: "Сборники: материалы, ручной и электроинструмент",
+    },
+  },
+  "catalog/materials": {
+    key: {
+      en: "Catalogs: building materials",
+      ru: "Сборники: строительные материалы",
+    },
+  },
+  "catalog/hand_tools": {
+    key: {
+      en: "Catalogs: hand tools",
+      ru: "Сборники: ручной инструмент",
+    },
+  },
+  "catalog/power_tools": {
+    key: {
+      en: "Catalogs: power tools",
+      ru: "Сборники: электроинструмент",
+    },
+  },
   about: {
     key: {
       en: "About the Project",

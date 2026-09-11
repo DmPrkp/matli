@@ -1,58 +1,84 @@
-# VS Code Copilot Instructions for material_request
+# Инструкции для ИИ-агентов в material_request
 
-This document is intended to guide AI coding agents through this codebase. It outlines key architecture decisions, developer workflows, patterns, and integration points to help you be immediately productive.
+Приложение для расчёта и заявок на строительные материалы (zayavka.xyz): пользователь
+выбирает систему работ, получает расчёт материалов и инструмента, выгружает заявку
+в таблицу.
 
-## 1. Project Overview
+Подробный разбор архитектуры — в [`CLAUDE.md`](../CLAUDE.md) в корне, по справочнику —
+в [`dictionary-server/README.md`](../dictionary-server/README.md). Здесь только то,
+что нужно знать до первой правки.
 
-- **Multi-Service Architecture:** The workspace contains multiple services:
-  - **calc-server:** Built with NestJS, this service implements core calculation logic. Key files:
-    - `calc-server/src/app.module.ts`
-    - Modules under `calc-server/src/module.calc`
-  - **order-server:** Also powered by NestJS, this service handles order processing and integrates with a Prisma-managed database. Key files:
-    - `order-server/src/app.module.ts`
-    - Prisma configuration in `order-server/prisma/schema.prisma`
-  - **ionic-client:** A Vite project serving as the frontend, with Vue components and custom routing. Key directories:
-    - `ionic-client/src/components/`
-    - Routes defined in `ionic-client/router/`
-- **Shared Code:** Common resources for authentication and other utilities are found under `shared/auth/` and similar directories.
+## Состав
 
-## 2. Developer Workflows
+Четыре сервиса на NestJS + клиент на Ionic/Vue 3, всё за nginx на одном хосте:
 
-- **Building:**
-  - Each server has its own `package.json` with scripts to build and run the application.
-  - Execute `npm run build` in the respective server directory; e.g., `calc-server` uses Nest CLI with configurations in `nest-cli.json`.
-- **Testing:**
-  - End-to-end and unit tests are located in `calc-server/test/` and `order-server/test/` respectively.
-  - Use provided scripts like `run-tests.sh` for quick test execution.
-- **Docker Integration:**
-  - Use the `docker-compose-watch` task (see task configuration in `compose.dev.yaml`) to start the development environment.
-- **Database Migrations:**
-  - Use Prisma for schema migrations; review `order-server/prisma/schema.prisma` and the migrations folder.
+| Сервис | Порт | Префикс | Хранилище |
+| --- | --- | --- | --- |
+| calc-server | 4000 | `/calc/api/v1` | голый `pg` + свои SQL-миграции |
+| order-server | 4100 | `/order/api/v1` | Prisma |
+| user-server | 4200 | `/user/api/v1` | Prisma |
+| dictionary-server | 4300 | `/dict/api/v1` | Drizzle |
+| ionic-client | 5173 | `/` | — |
 
-## 3. Project-Specific Conventions and Patterns
+Общего каталога с переиспользуемым кодом нет: сервисы не делят исходники, только
+контракты HTTP. Каждый со своим `package.json`, `eslint.config`, `tsconfig`.
 
-- **Module Organization:**
-  - Each service follows modular architecture. Controllers, services, and repositories are neatly separated (e.g., see `module.components` in calc-server and similar structure in order-server).
-- **Type Safety:**
-  - TypeScript is consistently used. Types and interfaces are organized in `src/types/` directories to enforce contracts across modules.
-- **Configuration Files:**
-  - Docker configurations, ESLint, and Vite configs are tailored to this project. Pay attention to service-specific overrides (e.g., custom Dockerfile configurations in `docker/` directories).
+## Что легко сделать неправильно
 
-## 4. Integration and Communication
+**calc-server не в этом репозитории.** `.gitignore` содержит `/calc-server/*`: код
+лежит рядом на диске и собирается compose-ом, но версионируется отдельно, а в прод
+уезжает готовым образом `dmprkp/calc-server:latest`. Правки в нём не попадут
+в коммит и не уедут деплоем этого репозитория.
 
-- **Cross-Service Interactions:**
-  - Some shared models and DTOs are stored in `shared/` directories, especially for auth and common business entities.
-- **External Dependencies:**
-  - The project integrates with MQTT (see `config/mqtt/mosquitto.conf`) and possibly other external systems.
-- **Frontend-Backend Contract:**
-  - The Ionic client communicates with the backend via REST APIs defined in the server modules.
+**Одна СУБД, четыре базы.** Контейнер Postgres держит `calc`, `order`, `user`
+и `dictionary`; три последние заводит `db/init/01-create-databases.sh`. Межбазовых
+JOIN-ов и внешних ключей не бывает — связи между нормами расхода и справочником
+держатся на голых `INTEGER`.
 
-## 5. Examples and Quick Tips
+**Расчёт сейчас разобран.** Справочник недавно выехал из calc-server в свою базу,
+а `calc-server/src/module.calc/repositories/calc.repository.ts` всё ещё джойнит
+уехавшие таблицы и в текущем виде не работает — о чём честно написано в шапке файла.
+Это зафиксированный промежуточный этап переезда, а не баг на «починить мимоходом»:
+по замыслу дальше словарь научится исполнять эти запросы, а репозиторий станет
+его клиентом.
 
-- **Adding a Feature:**
-  - Identify the appropriate module (e.g., a new API endpoint might go under `order-server/src/zayavka/`).
-  - Follow existing patterns, such as naming conventions from `calc-server/module.calc`.
-- **Debugging:**
-  - Use NestJS debugging configurations and VS Code launch settings tailored to each project.
-- **Common Commands:**
-  - Use `docker compose -f compose.dev.yaml -p matli-dev watch` to spin up the development environment.
+**MQTT не подключён.** `config/mqtt/mosquitto.conf` лежит в репозитории, но нет
+ни сервиса в compose, ни единой ссылки в коде. Не стройте на нём интеграций.
+
+## Разработка
+
+Основной режим — compose с hot-reload (правки в `src/` синхронизируются внутрь
+контейнеров, изменения `package.json` / `tsconfig.json` / `nest-cli.json` /
+`schema.prisma` пересобирают образ):
+
+```bash
+docker compose -f compose.dev.yaml -p matli-dev watch
+```
+
+Приложение — `http://localhost`, Adminer — `:8080`. Перед первым запуском нужны
+env-файлы `secrets/{calc,order,user,dict}-db/.db.env`: каталог `secrets/`
+в `.gitignore`, в репозитории только пустые папки.
+
+Тесты: `./run-tests.sh` из корня (order-server и ionic-client). Раннеры разные —
+Jest в order/user/calc, Vitest в dictionary-server и клиенте, Cypress для e2e клиента.
+`npm run test:unit` в клиенте запускает vitest **в watch-режиме**, для одного прогона
+нужен `npx vitest run`. Линт — `npm run lint` в каталоге сервиса, общего корневого нет.
+
+CI гоняет order-server и ionic-client на Node 22; ESLint 9 не заведётся на Node < 18.
+
+## Соглашения
+
+- Комментарии в активно развиваемых частях (dictionary-server, calc-server,
+  ionic-client, compose-файлы) — на русском, и объясняют «почему», а не «что»:
+  это, как правило, зафиксированные грабли. Держите тот же тон, не переводите
+  и не подчищайте их.
+- Алиасы: `~/*` — корень исходников в NestJS-сервисах, `@/*` — `src/` в клиенте.
+- Схема БД делается по-разному в каждом сервисе намеренно: Drizzle `push` без
+  миграций в справочнике (режим прототипа), Prisma-миграции в order/user,
+  самописный SQL-раннер в calc. Не сводите к одному инструменту без обсуждения.
+- В dictionary-server справочники не пишутся руками: контроллеры собираются
+  фабрикой `createDictionaryController()` поверх `CrudService`, валидация — Zod.
+  Новому ресурсу нужен свой `@Controller` на наследнике, иначе Nest не заинжектит
+  сервис в конструктор.
+- Ionic-компоненты клиента регистрируются глобально в `ionic-client/src/main.ts` —
+  в `.vue` импортируются только те, которых там нет.

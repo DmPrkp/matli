@@ -35,66 +35,54 @@
   } from "@ionic/vue";
   import {
     calculatorOutline,
-    settingsOutline,
-    informationCircleOutline,
+    libraryOutline,
     documentsOutline,
+    archiveOutline,
     logInOutline,
   } from "ionicons/icons";
   import { computed } from "vue";
   import { useRoute } from "vue-router";
   import injectI18nToRoute from "@/mixins/injectI18nToRoute";
   import { useAuthStore } from "@/store/auth";
+  import { AUTH_ENABLED } from "@/constants/auth";
 
   const authStore = useAuthStore();
 
+  const CATALOG = {
+    link: "catalog",
+    name: "catalog",
+    icon: libraryOutline,
+  };
+  const MAIN = {
+    link: "main",
+    name: "main",
+    icon: calculatorOutline,
+  };
+  const ZAYAVKA = {
+    link: "zayavka",
+    name: "zayavka",
+    icon: documentsOutline,
+  };
+  const WAREHOUSES = {
+    link: "warehouses",
+    name: "warehouses",
+    icon: archiveOutline,
+  };
+  const AUTH = {
+    link: "auth",
+    name: "auth",
+    icon: logInOutline,
+  };
+
+  // Настроек здесь нет: они открываются аватаром справа в шапке.
   const menuItems = computed(() => {
-    if (authStore.isAuthenticated) {
-      return [
-        {
-          link: "about",
-          name: "about",
-          icon: informationCircleOutline,
-        },
-        {
-          link: "main",
-          name: "main",
-          icon: calculatorOutline,
-        },
-        {
-          link: "zayavka",
-          name: "zayavka",
-          icon: documentsOutline,
-        },
-        {
-          link: "settings",
-          name: "settings",
-          icon: settingsOutline,
-        },
-      ];
+    // Пока авторизация выключена флагом, вкладку входа не показываем
+    // и работаем так, будто пользователь уже вошёл.
+    if (!AUTH_ENABLED || authStore.isAuthenticated) {
+      return [CATALOG, MAIN, ZAYAVKA, WAREHOUSES];
     }
 
-    return [
-      {
-        link: "about",
-        name: "about",
-        icon: informationCircleOutline,
-      },
-      {
-        link: "auth",
-        name: "auth",
-        icon: logInOutline,
-      },
-      {
-        link: "main",
-        name: "main",
-        icon: calculatorOutline,
-      },
-      {
-        link: "settings",
-        name: "settings",
-        icon: settingsOutline,
-      },
-    ];
+    return [CATALOG, AUTH, MAIN];
   });
 
   const getLocalizedRoute = (routeName: string) => {

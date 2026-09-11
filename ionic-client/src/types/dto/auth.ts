@@ -9,10 +9,20 @@ export type AuthResponse = {
   [key: string]: unknown;
 };
 
+export type RegisterPayload = {
+  login: string;
+  password: string;
+  firstName: string;
+  lastName?: string;
+};
+
 export type UserProfile = {
   id: string | number;
   email?: string;
   username?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
   createdAt?: string;
   updatedAt?: string;
 };

@@ -51,12 +51,16 @@ import "@ionic/vue/css/display.css";
 /* Theme variables */
 import "./theme/variables.css";
 
+import { applyInitialTheme } from "./plugins/theme";
 import BaseModel from "./models/BaseModel";
 import AuthModel from "./models/AuthModel";
 import { useAuthStore } from "./store/auth";
+import { AUTH_ENABLED } from "./constants/auth";
 
 const head = createHead();
 const pinia = createPinia();
+// Тема не привязана к странице настроек: применяем до монтирования.
+applyInitialTheme();
 BaseModel.setBaseUrl();
 const defaultBaseUrl = BaseModel.baseURL;
 AuthModel.setBaseUrl(
@@ -65,12 +69,17 @@ AuthModel.setBaseUrl(
     defaultBaseUrl
 );
 const authStore = useAuthStore(pinia);
+// Сессию из localStorage поднимаем и при выключенном флаге: он отключает только
+// проверку в гварде, а значок «не авторизован» в шапке должен видеть реальный вход.
 authStore.initialize();
 if (authStore.isAuthenticated) {
   authStore.fetchProfile().catch(() => undefined);
 }
 
 router.beforeEach(async (to) => {
+  // Авторизация выключена флагом — пускаем везде, проверку не трогаем.
+  if (!AUTH_ENABLED) return true;
+
   const requiresAuth = to.meta?.requiresAuth !== false;
   const localeParam =
     typeof to.params.locale === "string"

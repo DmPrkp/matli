@@ -1,0 +1,308 @@
+import { relations } from 'drizzle-orm';
+import {
+  boolean,
+  index,
+  integer,
+  numeric,
+  pgTable,
+  primaryKey,
+  smallint,
+  text,
+  timestamp,
+  unique,
+  uniqueIndex,
+  varchar,
+} from 'drizzle-orm/pg-core';
+
+/**
+ * Колонки, которые есть у каждой позиции справочника.
+ * isActive — мягкое удаление: позицию нельзя удалить физически, пока на неё
+ * ссылаются нормы расхода в calc-server (FK через границу сервисов не работает).
+ */
+const lifecycle = {
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+};
+
+/**
+ * Учёт залитых сид-файлов.
+ *
+ * Обязана быть объявлена здесь: `drizzle-kit push --force` сносит из базы всё,
+ * чего нет в этой схеме — включая служебные таблицы.
+ */
+export const seedHistory = pgTable('seed_history', {
+  filename: text('filename').primaryKey(),
+  appliedAt: timestamp('applied_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/* ------------------------------------------------------------------ единицы */
+
+/** Бывш. свободная строка `measure` в params / materials / power_tool_params. */
+export const units = pgTable('units', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  code: varchar('code', { length: 16 }).notNull().unique(),
+  nameRu: varchar('name_ru', { length: 50 }).notNull(),
+  nameEn: varchar('name_en', { length: 50 }).notNull(),
+  ...lifecycle,
+});
+
+/** Бывш. params_titles — вид параметра (длина, диаметр, напряжение). */
+export const paramKinds = pgTable('param_kinds', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  code: varchar('code', { length: 32 }).notNull().unique(),
+  nameRu: varchar('name_ru', { length: 50 }).notNull(),
+  nameEn: varchar('name_en', { length: 50 }).notNull(),
+  ...lifecycle,
+});
+
+/**
+ * Бывш. params — значение с единицей. `parameter VARCHAR` стал `value NUMERIC`.
+ *
+ * Вид параметра живёт здесь, а не на связке с типоразмером. Пока он был на
+ * связке, одно и то же «8 мм» можно было пометить diameter у одного материала
+ * и length у другого — что и случилось с параметрами 207 и 208. Теперь такое
+ * невыразимо: у значения ровно один вид.
+ *
+ * Обратная сторона: «100 мм как длина» и «100 мм как ширина» — это две разные
+ * строки. Поэтому уникальность по тройке, а не по паре.
+ *
+ * kindId необязателен: у 91 значения из 118 вид в исходных данных не задан
+ * (метры для рулеток и часть неиспользуемых значений).
+ */
+export const paramValues = pgTable(
+  'param_values',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    kindId: integer('kind_id').references(() => paramKinds.id, { onDelete: 'restrict' }),
+    value: numeric('value', { precision: 12, scale: 4 }).notNull(),
+    unitId: integer('unit_id')
+      .notNull()
+      .references(() => units.id, { onDelete: 'restrict' }),
+    ...lifecycle,
+  },
+  (t) => [
+    // nullsNotDistinct: иначе два значения без вида с одинаковым числом
+    // проскочили бы мимо ограничения — NULL в Postgres по умолчанию не равен NULL
+    unique('param_values_kind_value_unit_uq').on(t.kindId, t.value, t.unitId).nullsNotDistinct(),
+    index('param_values_unit_idx').on(t.unitId),
+    index('param_values_kind_idx').on(t.kindId),
+  ],
+);
+
+/* ---------------------------------------------------------------- структура */
+
+export const systems = pgTable('systems', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  title: varchar('title', { length: 50 }).notNull().unique(),
+  description: varchar('description', { length: 200 }),
+  ...lifecycle,
+});
+
+/** Бывш. components — этап/слой работ внутри системы. `layer` стал `position`. */
+export const workStages = pgTable(
+  'work_stages',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    title: varchar('title', { length: 50 }).notNull().unique(),
+    position: smallint('position').notNull(),
+    systemId: integer('system_id')
+      .notNull()
+      .references(() => systems.id, { onDelete: 'restrict' }),
+    ...lifecycle,
+  },
+  (t) => [
+    index('work_stages_system_idx').on(t.systemId),
+    uniqueIndex('work_stages_system_position_uq').on(t.systemId, t.position),
+  ],
+);
+
+/* ----------------------------------------------------------------- позиции */
+
+export const handTools = pgTable('hand_tools', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  nameRu: varchar('name_ru', { length: 100 }).notNull().unique(),
+  nameEn: varchar('name_en', { length: 100 }).notNull().unique(),
+  ...lifecycle,
+});
+
+export const powerTools = pgTable('power_tools', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  nameRu: varchar('name_ru', { length: 100 }).notNull(),
+  nameEn: varchar('name_en', { length: 100 }).notNull(),
+  isCorded: boolean('is_corded').notNull(),
+  ...lifecycle,
+});
+
+/**
+ * Тип материала: пиломатериалы, крепёж, сухие смеси, строительные леса…
+ * Отдельная таблица, связь необязательная — у материала типа может не быть.
+ */
+export const materialTypes = pgTable('material_types', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  code: varchar('code', { length: 32 }).notNull().unique(),
+  nameRu: varchar('name_ru', { length: 100 }).notNull(),
+  nameEn: varchar('name_en', { length: 100 }).notNull(),
+  ...lifecycle,
+});
+
+export const materials = pgTable(
+  'materials',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    nameRu: varchar('name_ru', { length: 150 }).notNull(),
+    nameEn: varchar('name_en', { length: 150 }).notNull(),
+    descriptionRu: text('description_ru'),
+    descriptionEn: text('description_en'),
+    unitId: integer('unit_id')
+      .notNull()
+      .references(() => units.id, { onDelete: 'restrict' }),
+    /** Необязательный: часть материалов пока не разнесена по типам. */
+    typeId: integer('type_id').references(() => materialTypes.id, { onDelete: 'set null' }),
+    ...lifecycle,
+  },
+  (t) => [index('materials_unit_idx').on(t.unitId), index('materials_type_idx').on(t.typeId)],
+);
+
+/* ---------------------------------------------------------------- варианты */
+
+/** Бывш. assembled_hand_tools. `uniq_key` стал `code`, лимит поднят с 10 до 64. */
+export const handToolVariants = pgTable(
+  'hand_tool_variants',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    code: varchar('code', { length: 64 }).notNull().unique(),
+    handToolId: integer('hand_tool_id')
+      .notNull()
+      .references(() => handTools.id, { onDelete: 'restrict' }),
+    ...lifecycle,
+  },
+  (t) => [index('hand_tool_variants_tool_idx').on(t.handToolId)],
+);
+
+/** Бывш. assembled_materials. */
+export const materialVariants = pgTable(
+  'material_variants',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+    code: varchar('code', { length: 64 }).notNull().unique(),
+    materialId: integer('material_id')
+      .notNull()
+      .references(() => materials.id, { onDelete: 'restrict' }),
+    ...lifecycle,
+  },
+  (t) => [index('material_variants_material_idx').on(t.materialId)],
+);
+
+/**
+ * Бывш. hand_tool_params. Первичного ключа не было — дубли размножали строки
+ * в ARRAY_AGG и тихо портили расчёт.
+ * Вид параметра сюда больше не пишется: он на самом значении.
+ */
+export const handToolVariantParams = pgTable(
+  'hand_tool_variant_params',
+  {
+    variantId: integer('variant_id')
+      .notNull()
+      .references(() => handToolVariants.id, { onDelete: 'cascade' }),
+    paramValueId: integer('param_value_id')
+      .notNull()
+      .references(() => paramValues.id, { onDelete: 'restrict' }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.variantId, t.paramValueId] }),
+    index('hand_tool_variant_params_value_idx').on(t.paramValueId),
+  ],
+);
+
+/** Бывш. material_params. Вид параметра — на значении, а не здесь. */
+export const materialVariantParams = pgTable(
+  'material_variant_params',
+  {
+    variantId: integer('variant_id')
+      .notNull()
+      .references(() => materialVariants.id, { onDelete: 'cascade' }),
+    paramValueId: integer('param_value_id')
+      .notNull()
+      .references(() => paramValues.id, { onDelete: 'restrict' }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.variantId, t.paramValueId] }),
+    index('material_variant_params_value_idx').on(t.paramValueId),
+  ],
+);
+
+/* --------------------------------------------------------------- отношения */
+
+export const unitsRelations = relations(units, ({ many }) => ({
+  paramValues: many(paramValues),
+  materials: many(materials),
+}));
+
+export const paramKindsRelations = relations(paramKinds, ({ many }) => ({
+  paramValues: many(paramValues),
+}));
+
+export const paramValuesRelations = relations(paramValues, ({ one, many }) => ({
+  unit: one(units, { fields: [paramValues.unitId], references: [units.id] }),
+  kind: one(paramKinds, { fields: [paramValues.kindId], references: [paramKinds.id] }),
+  handToolVariantParams: many(handToolVariantParams),
+  materialVariantParams: many(materialVariantParams),
+}));
+
+export const systemsRelations = relations(systems, ({ many }) => ({
+  workStages: many(workStages),
+}));
+
+export const workStagesRelations = relations(workStages, ({ one }) => ({
+  system: one(systems, { fields: [workStages.systemId], references: [systems.id] }),
+}));
+
+export const handToolsRelations = relations(handTools, ({ many }) => ({
+  variants: many(handToolVariants),
+}));
+
+export const materialTypesRelations = relations(materialTypes, ({ many }) => ({
+  materials: many(materials),
+}));
+
+export const materialsRelations = relations(materials, ({ one, many }) => ({
+  unit: one(units, { fields: [materials.unitId], references: [units.id] }),
+  type: one(materialTypes, { fields: [materials.typeId], references: [materialTypes.id] }),
+  variants: many(materialVariants),
+}));
+
+export const handToolVariantsRelations = relations(handToolVariants, ({ one, many }) => ({
+  handTool: one(handTools, { fields: [handToolVariants.handToolId], references: [handTools.id] }),
+  params: many(handToolVariantParams),
+}));
+
+export const materialVariantsRelations = relations(materialVariants, ({ one, many }) => ({
+  material: one(materials, { fields: [materialVariants.materialId], references: [materials.id] }),
+  params: many(materialVariantParams),
+}));
+
+export const handToolVariantParamsRelations = relations(handToolVariantParams, ({ one }) => ({
+  variant: one(handToolVariants, {
+    fields: [handToolVariantParams.variantId],
+    references: [handToolVariants.id],
+  }),
+  paramValue: one(paramValues, {
+    fields: [handToolVariantParams.paramValueId],
+    references: [paramValues.id],
+  }),
+}));
+
+export const materialVariantParamsRelations = relations(materialVariantParams, ({ one }) => ({
+  variant: one(materialVariants, {
+    fields: [materialVariantParams.variantId],
+    references: [materialVariants.id],
+  }),
+  paramValue: one(paramValues, {
+    fields: [materialVariantParams.paramValueId],
+    references: [paramValues.id],
+  }),
+}));

@@ -1,18 +1,20 @@
 {
   "title": "Zayavka.ru",
   "footer": {
-    "settings": "Настройки",
     "main": "Калькулятор",
     "about": "О проекте",
     "zayavka": "Заявки",
-    "auth": "Войти"
+    "auth": "Войти",
+    "catalog": "Сборники",
+    "warehouses": "Склады"
   },
   "ui": {
     "buttons": {
       "save": "сохранить",
       "cancel": "назад",
       "remove": "удалить",
-      "add": "добавить"
+      "add": "добавить",
+      "close": "закрыть"
     },
     "labels": {
       "measure": "ед.изм",
@@ -30,7 +32,13 @@
       "volume": "объем",
       "area": "площ.",
       "density": "плотн.",
-      "thickness": "тлщ."
+      "thickness": "тлщ.",
+      "diameter": "Ø",
+      "voltage": "напр."
+    },
+    "locales": {
+      "ru": "Русский",
+      "en": "English"
     }
   },
   "measure": {
@@ -42,7 +50,9 @@
     "g": "г",
     "m": "м",
     "cm": "см",
-    "mm": "мм"
+    "mm": "мм",
+    "m2": "м²",
+    "v": "В"
   },
   "pages": {
     "main": {
@@ -104,19 +114,47 @@
       "title_register": "Регистрация",
       "login": "Вход",
       "register": "Регистрация",
-      "email": "Email",
+      "username": "Логин",
+      "first_name": "Имя",
+      "last_name": "Фамилия (необязательно)",
       "password": "Пароль",
       "confirm": "Повторите пароль",
       "login_action": "Войти",
       "register_action": "Создать аккаунт",
-      "password_mismatch": "Пароли не совпадают"
+      "password_mismatch": "Пароли не совпадают",
+      "not_authorized": "Вы не вошли в аккаунт — нажмите, чтобы войти"
     },
     "settings": {
       "title": "Профиль",
       "email": "Электронная почта",
       "joined": "Дата регистрации",
-      "logout": "Выйти"
+      "logout": "Выйти",
+      "appearance": "Внешний вид",
+      "language": "Язык",
+      "theme": "Тёмная тема",
+      "heading": "Настройки",
+      "open": "Открыть настройки"
+    },
+    "catalog": {
+      "title": "Сборники",
+      "search": "Поиск по названию",
+      "empty": "Ничего не найдено",
+      "no_variants": "Типоразмеров нет",
+      "single_variant": "Без типоразмеров",
+      "corded": "сетевой",
+      "cordless": "аккумуляторный",
+      "tabs": {
+        "materials": "Материалы",
+        "hand_tools": "Ручной инструмент",
+        "power_tools": "Электроинструмент"
+      }
+    },
+    "warehouses": {
+      "title": "Склады"
     }
   },
-  "current": { "ac": "сетевой", "dc": "аккум" }
+  "current": {
+    "ac": "сетевой",
+    "dc": "аккум"
+  }
 }

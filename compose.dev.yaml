@@ -95,6 +95,36 @@ services:
     depends_on:
       - db
 
+  dictionary-server:
+    build:
+      context: ./dictionary-server
+      dockerfile: ./docker/Dockerfile.dev
+    ports:
+      - 4300:4300
+    env_file:
+      - ./secrets/dict-db/.db.env
+    develop:
+      watch:
+        - action: sync
+          path: ./dictionary-server/src
+          target: /usr/dictionary-server/src
+          ignore:
+            - node_modules/
+            - dist/
+        - action: rebuild
+          path: ./dictionary-server/package.json
+        - action: rebuild
+          path: ./dictionary-server/tsconfig.json
+        - action: rebuild
+          path: ./dictionary-server/nest-cli.json
+        - action: rebuild
+          path: ./dictionary-server/docker
+    depends_on:
+      db:
+        # именно готовности: drizzle-kit push стучится в базу первым делом
+        # и без этого падает на ещё не поднявшемся Postgres
+        condition: service_healthy
+
   ionic-client:
     build:
       context: ./ionic-client
@@ -122,16 +152,28 @@ services:
       - calc-server
       - order-server
       - user-server
+      - dictionary-server
       - db
 
   db:
-    image: postgres
+    # Версия закреплена намеренно: с незакреплённым postgres очередной pull приносит
+    # новую мажорную версию, которая не читает старый каталог данных.
+    image: postgres:18-alpine
     restart: always
     user: postgres
     environment:
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
       - POSTGRES_DB=calc
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+      # postgres 18+ ждёт монтирование каталогом выше, а не в /data
+      - matli_pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
 
   adminer:
     image: adminer
@@ -140,3 +182,6 @@ services:
       - 8080:8080
     depends_on:
       - db
+
+volumes:
+  matli_pgdata:

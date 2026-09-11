@@ -54,7 +54,8 @@ export default class BaseModel {
   static async get<R>(params: string): Promise<R | undefined> {
     try {
       const url = this.buildUrl(params);
-      const response = await fetch(url);
+      // Заголовки нужны и GET-у: без Authorization закрытые эндпоинты (профиль) отвечали 401.
+      const response = await fetch(url, { headers: this.baseOpts.headers });
       if (!response.ok) {
         throw new Error(response.statusText);
       }
