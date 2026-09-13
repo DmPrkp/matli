@@ -22,7 +22,7 @@ describe('AppController (e2e)', () => {
     const moduleFixture: TestingModule = await builder
       .overrideProvider(PrismaService)
       .useValue({
-        zayavka: {
+        zaiavka: {
           findMany: jest.fn().mockResolvedValue([]),
           findUnique: jest.fn().mockResolvedValue(null),
           create: jest.fn().mockResolvedValue({ id: 1 }),
@@ -35,8 +35,8 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/order/api/v1/zayavka (GET)', async () => {
-    const res = await request(app.getHttpServer()).get('/order/api/v1/zayavka');
+  it('/order/api/v1/zaiavka (GET)', async () => {
+    const res = await request(app.getHttpServer()).get('/order/api/v1/zaiavka');
     expect([200, 404]).toContain(res.status);
   });
 });

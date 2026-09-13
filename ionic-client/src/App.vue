@@ -15,7 +15,7 @@
               font-size: 1.5em;
             "
           >
-            {{ "zayávka".toLocaleUpperCase() + ".xyz" }}
+            {{ "zaiávka".toLocaleUpperCase() + ".xyz" }}
           </ion-title>
         </router-link>
 

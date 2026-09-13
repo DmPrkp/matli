@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ZayavkaController } from './zayavka/zayavka.controller';
-import { ZayavkaService } from './zayavka/zayavka.service';
+import { ZaiavkaController } from './zaiavka/zaiavka.controller';
+import { ZaiavkaService } from './zaiavka/zaiavka.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ZayavkaSheetGeneratorModule } from './zayavka_sheet_generator/zayavka_sheet_generator.module';
+import { ZaiavkaSheetGeneratorModule } from './zaiavka_sheet_generator/zaiavka_sheet_generator.module';
 
 @Module({
-  imports: [ZayavkaSheetGeneratorModule],
-  controllers: [ZayavkaController],
-  providers: [ZayavkaService, PrismaService],
+  imports: [ZaiavkaSheetGeneratorModule],
+  controllers: [ZaiavkaController],
+  providers: [ZaiavkaService, PrismaService],
 })
-export class AppModule { }
+export class AppModule {}

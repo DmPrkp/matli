@@ -36,12 +36,12 @@ const routes = [
     ],
   },
   {
-    path: "ru/zayavka",
-    name: "zayavka-list",
+    path: "ru/zaiavka",
+    name: "zaiavka-list",
   },
 ];
 
-const baseUrl = "https://zayavka.xyz";
+const baseUrl = "https://zaiavka.xyz";
 
 // Recursively extract all route paths
 function getPaths(routes, parentPath = "") {
@@ -78,7 +78,7 @@ const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
     <lastmod>${page.lastmod}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`
+  </url>`,
     )
     .join("\n")}
 </urlset>`;

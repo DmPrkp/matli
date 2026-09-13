@@ -1,25 +1,24 @@
-import { ZayavkaType } from "@/types/entity/zayavka";
-import BaseOrderModel from "./BaseZayavkaModel";
+import { ZaiavkaType } from "@/types/entity/zaiavka";
+import BaseOrderModel from "./BaseZaiavkaModel";
 import { MaterialRequestDTO } from "@/types/dto";
 
-export default class Zayavka {
-  data: ZayavkaType;
+export default class Zaiavka {
+  data: ZaiavkaType;
 
   static async findAll() {
-    const materialRequests = await BaseOrderModel.get<MaterialRequestDTO[]>(
-      "/zayavka"
-    );
+    const materialRequests =
+      await BaseOrderModel.get<MaterialRequestDTO[]>("/zaiavka");
     return materialRequests || [];
   }
 
   static async find(id: number) {
     const materialRequest = await BaseOrderModel.get<MaterialRequestDTO>(
-      `/zayavka/${id}`
+      `/zaiavka/${id}`,
     );
     return materialRequest;
   }
 
-  constructor(data: ZayavkaType) {
+  constructor(data: ZaiavkaType) {
     this.data = {
       system: data.system,
       hand_tools: data.hand_tools ?? [],
@@ -30,7 +29,7 @@ export default class Zayavka {
 
   create() {
     return BaseOrderModel.post<MaterialRequestDTO>({
-      params: "/zayavka",
+      params: "/zaiavka",
       body: this.data,
     });
   }
@@ -42,9 +41,9 @@ export default class Zayavka {
     });
   }
 
-  update(id: number, data: ZayavkaType) {
+  update(id: number, data: ZaiavkaType) {
     return BaseOrderModel.put<MaterialRequestDTO>({
-      params: `/zayavka/${id}`,
+      params: `/zaiavka/${id}`,
       body: data,
     });
   }

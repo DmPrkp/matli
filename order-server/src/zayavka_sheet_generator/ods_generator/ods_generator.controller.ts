@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { CreateZayavkaDto, Param } from '~/types';
+import { CreateZaiavkaDto, Param } from '~/types';
 import * as XLSX from 'xlsx';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -15,13 +15,13 @@ const TITLES = {
 export class XlsxGeneratorController {
   @Post()
   async create(
-    @Body() createZayavkaDto: CreateZayavkaDto,
+    @Body() createZaiavkaDto: CreateZaiavkaDto,
     @Res() res: Response,
   ) {
     const id = Date.now();
-    const fileName = `zayavka_${id}.ods`;
+    const fileName = `zaiavka_${id}.ods`;
     const filePath = path.resolve('./static', fileName);
-    await createSheetFile(createZayavkaDto, filePath);
+    await createSheetFile(createZaiavkaDto, filePath);
     console.log('Excel file created successfully!');
 
     if (!fs.existsSync(filePath)) {
@@ -74,7 +74,7 @@ function addToolsToRows<
   return rows;
 }
 
-async function createSheetFile(data: CreateZayavkaDto, outputPath: string) {
+async function createSheetFile(data: CreateZaiavkaDto, outputPath: string) {
   let rows: any[] = [];
 
   // Add Materials section
@@ -88,14 +88,14 @@ async function createSheetFile(data: CreateZayavkaDto, outputPath: string) {
   });
 
   // Add Hand Tools section
-  rows = addToolsToRows<CreateZayavkaDto['hand_tools']>(
+  rows = addToolsToRows<CreateZaiavkaDto['hand_tools']>(
     data.hand_tools,
     TITLES.HAND_TOOLS,
     rows,
   );
 
   // Add Power Tools section
-  rows = addToolsToRows<CreateZayavkaDto['power_tools']>(
+  rows = addToolsToRows<CreateZaiavkaDto['power_tools']>(
     data.power_tools,
     TITLES.POWER_TOOLS,
     rows,
@@ -113,7 +113,7 @@ async function createSheetFile(data: CreateZayavkaDto, outputPath: string) {
 
   // Create a new workbook
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Zayavka Sheet');
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Zaiavka Sheet');
 
   // Write the workbook to the desired output path with the ODS format
   XLSX.writeFile(workbook, outputPath, { bookType: 'ods' });

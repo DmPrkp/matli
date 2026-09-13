@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## О проекте
 
-Приложение для расчёта и заявок на строительные материалы (zayavka.xyz). Пользователь
+Приложение для расчёта и заявок на строительные материалы (zaiavka.xyz). Пользователь
 выбирает систему работ (мокрый фасад, рамные леса), получает расчёт материалов,
 ручного и электроинструмента, и выгружает заявку в таблицу.
 
@@ -50,15 +50,15 @@ user-server дополнительно читает `JWT_SECRET` (без нег�
 
 `run-tests.sh` из корня прогоняет order-server и ionic-client целиком. Точечно:
 
-| | order-server / user-server / calc-server | dictionary-server | ionic-client |
-|---|---|---|---|
-| раннер | Jest | Vitest | Vitest + Cypress |
-| все юнит-тесты | `npm run test` | `npm run test` | `npx vitest run` |
-| один файл | `npx jest src/zayavka/zayavka.controller.spec.ts` | `npx vitest run src/…` | `npx vitest run tests/unit/components.spec.ts` |
-| один кейс | `npm run test -- -t "имя теста"` | `npx vitest run -t "имя"` | `npx vitest run -t "имя"` |
-| e2e | `npm run test:e2e` (свой jest-e2e.json) | — | `npm run test:e2e` (cypress) |
-| линт | `npm run lint` (с `--fix`) | то же | то же |
-| сборка | `npm run build` | то же | `npm run build` (сначала генерит sitemap, потом `vue-tsc` + `vite build`) |
+|                | order-server / user-server / calc-server          | dictionary-server         | ionic-client                                                              |
+| -------------- | ------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------- |
+| раннер         | Jest                                              | Vitest                    | Vitest + Cypress                                                          |
+| все юнит-тесты | `npm run test`                                    | `npm run test`            | `npx vitest run`                                                          |
+| один файл      | `npx jest src/zaiavka/zaiavka.controller.spec.ts` | `npx vitest run src/…`    | `npx vitest run tests/unit/components.spec.ts`                            |
+| один кейс      | `npm run test -- -t "имя теста"`                  | `npx vitest run -t "имя"` | `npx vitest run -t "имя"`                                                 |
+| e2e            | `npm run test:e2e` (свой jest-e2e.json)           | —                         | `npm run test:e2e` (cypress)                                              |
+| линт           | `npm run lint` (с `--fix`)                        | то же                     | то же                                                                     |
+| сборка         | `npm run build`                                   | то же                     | `npm run build` (сначала генерит sitemap, потом `vue-tsc` + `vite build`) |
 
 Осторожно: `npm run test:unit` в ionic-client — это `vitest` **в watch-режиме**.
 Для одного прогона используйте `npx vitest run`.
@@ -77,13 +77,13 @@ e2e клиента там закомментированы. Деплой — `./
 Каждый сервис вешает свой глобальный префикс и живёт на своём порту; nginx
 раскладывает их по одному хосту:
 
-| Сервис | Порт | Префикс | Хранилище | Что делает |
-|---|---|---|---|---|
-| calc-server | 4000 | `/calc/api/v1` | голый `pg` + SQL-миграции | нормы расхода и логика расчёта |
-| order-server | 4100 | `/order/api/v1` | Prisma | заявки (`Zayavka.data` — JSON), выгрузка в xlsx/ods |
-| user-server | 4200 | `/user/api/v1` | Prisma | регистрация, вход, JWT |
-| dictionary-server | 4300 | `/dict/api/v1` | Drizzle | справочник позиций, типоразмеров, параметров |
-| ionic-client | 5173 | `/` | — | Ionic + Vue 3 |
+| Сервис            | Порт | Префикс         | Хранилище                 | Что делает                                          |
+| ----------------- | ---- | --------------- | ------------------------- | --------------------------------------------------- |
+| calc-server       | 4000 | `/calc/api/v1`  | голый `pg` + SQL-миграции | нормы расхода и логика расчёта                      |
+| order-server      | 4100 | `/order/api/v1` | Prisma                    | заявки (`Zaiavka.data` — JSON), выгрузка в xlsx/ods |
+| user-server       | 4200 | `/user/api/v1`  | Prisma                    | регистрация, вход, JWT                              |
+| dictionary-server | 4300 | `/dict/api/v1`  | Drizzle                   | справочник позиций, типоразмеров, параметров        |
+| ionic-client      | 5173 | `/`             | —                         | Ionic + Vue 3                                       |
 
 **calc-server не в этом репозитории.** `.gitignore` содержит `/calc-server/*`: код
 лежит рядом на диске и собирается compose-ом, но версионируется отдельно, а в прод
@@ -187,7 +187,7 @@ e2e клиента там закомментированы. Деплой — `./
   `AUTH_ENABLED = false` (`src/constants/auth.ts`): стор, страница входа, модель и
   роут целы, проверка просто пропускается. Флаг в `true` — авторизация возвращается.
 - **API**: `BaseModel` (fetch + `baseURL`), от него наследуются `DictionaryModel`,
-  `BaseCalcModel`, `BaseZayavkaModel`, `AuthModel` — каждый задаёт только свой
+  `BaseCalcModel`, `BaseZaiavkaModel`, `AuthModel` — каждый задаёт только свой
   `apiVersion` (= префикс сервиса). URL клеятся встык, поэтому путь обязан начинаться
   со слэша. `BaseModel.get()` **глотает сетевую ошибку и возвращает `undefined`** —
   вызывающий код обязан это учитывать (см. `CatalogPage.load()`).

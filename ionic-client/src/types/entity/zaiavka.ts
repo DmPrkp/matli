@@ -1,6 +1,6 @@
 import { MaterialListDTO, MergedHandTool, PowerTool } from "../dto";
 
-export type ZayavkaType = {
+export type ZaiavkaType = {
   id?: number;
   system: string;
   hand_tools: MergedHandTool[];

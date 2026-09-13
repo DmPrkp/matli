@@ -1,5 +1,5 @@
 <template>
-  <ion-page v-if="route.name === 'zayavka'">
+  <ion-page v-if="route.name === 'zaiavka'">
     <ion-content>
       <ion-refresher
         slot="fixed"
@@ -29,7 +29,7 @@
         v-model="powerTools"
       />
       <MaterialActionPanel
-        :id="Number(route.params.zayavka)"
+        :id="Number(route.params.zaiavka)"
         :system="system"
         :materials="resultMatList"
       />
@@ -38,13 +38,13 @@
   <router-view v-else />
 </template>
 <script setup lang="ts">
-  import { useZayavkaStore } from "@/store/zayavka";
+  import { useZaiavkaStore } from "@/store/zaiavka";
   import { RefresherCustomEvent } from "@ionic/vue";
   import { onMounted, ref } from "vue";
   import { useRoute } from "vue-router";
   import { ResultMaterialsDTO, StoredMaterialRequestDTO } from "@/types/dto";
-  import { ZayavkaType } from "@/types/entity/zayavka";
-  import Zayavka from "@/models/zayavka";
+  import { ZaiavkaType } from "@/types/entity/zaiavka";
+  import Zaiavka from "@/models/zaiavka";
   import { MATERIAL_LIST_STATUS } from "@/constants";
   import HandToolListItems from "@/components/pagesParts/handTools/HandToolListItems.vue";
   import HandToolListHeader from "@/components/pagesParts/handTools/HandToolListHeader.vue";
@@ -52,7 +52,7 @@
   import PowerToolListItems from "@/components/pagesParts/powerTools/PowerToolListItems.vue";
   import MaterialActionPanel from "@/components/pagesParts/MaterialActionPanel.vue";
 
-  const store = useZayavkaStore();
+  const store = useZaiavkaStore();
   const route = useRoute();
   const materials = ref<StoredMaterialRequestDTO["data"]["materials"]>([]);
   const handTools = ref<StoredMaterialRequestDTO["data"]["hand_tools"]>([]);
@@ -70,15 +70,15 @@
   }
 
   onMounted(async () => {
-    let mr = store.getMaterialRequest(Number(route.params.zayavka));
+    let mr = store.getMaterialRequest(Number(route.params.zaiavka));
 
     if (mr) {
       setMaterials(mr.data);
       return;
     }
 
-    const materialRequestsDTO = await Zayavka.find(
-      Number(route.params.zayavka)
+    const materialRequestsDTO = await Zaiavka.find(
+      Number(route.params.zaiavka),
     );
 
     if (!materialRequestsDTO) {
@@ -86,7 +86,7 @@
     }
 
     store.setMaterialRequest(materialRequestsDTO);
-    mr = store.getMaterialRequest(Number(route.params.zayavka));
+    mr = store.getMaterialRequest(Number(route.params.zaiavka));
 
     if (!mr) {
       return;
@@ -95,11 +95,11 @@
     setMaterials(mr.data);
   });
 
-  function setMaterials(zayavka: ZayavkaType) {
-    resultMatList.value = zayavka;
-    materials.value = zayavka.materials;
-    handTools.value = zayavka.hand_tools;
-    powerTools.value = zayavka.power_tools;
-    system.value = zayavka.system;
+  function setMaterials(zaiavka: ZaiavkaType) {
+    resultMatList.value = zaiavka;
+    materials.value = zaiavka.materials;
+    handTools.value = zaiavka.hand_tools;
+    powerTools.value = zaiavka.power_tools;
+    system.value = zaiavka.system;
   }
 </script>

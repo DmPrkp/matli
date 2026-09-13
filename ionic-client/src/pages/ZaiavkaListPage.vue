@@ -1,5 +1,5 @@
 <template>
-  <ion-page v-if="route.name === 'zayavka-list'">
+  <ion-page v-if="route.name === 'zaiavka-list'">
     <ion-content>
       <ion-refresher
         slot="fixed"
@@ -10,34 +10,34 @@
       <div class="ion-padding">
         <ion-item-divider>
           <ion-title>
-            {{ $t("pages.zayavka_list.title") }}
+            {{ $t("pages.zaiavka_list.title") }}
           </ion-title>
         </ion-item-divider>
       </div>
       <ion-list>
         <ion-item
-          v-for="zayavka in materialRequests"
-          :key="zayavka.id"
+          v-for="zaiavka in materialRequests"
+          :key="zaiavka.id"
         >
           <ion-grid>
             <ion-row
               color="secondary"
-              @click="openItem(zayavka.id)"
+              @click="openItem(zaiavka.id)"
               style="cursor: pointer"
             >
               <ion-col
                 size="5"
                 class="ion-align-items-start"
               >
-                {{ $t("pages.zayavka_list.item_title") }}
-                {{ zayavka.id }}
+                {{ $t("pages.zaiavka_list.item_title") }}
+                {{ zaiavka.id }}
               </ion-col>
               <ion-col
                 size="7"
                 class="ion-align-items-start"
               >
-                {{ $t("pages.zayavka_list.from") }}
-                {{ toLocaleDate(zayavka.createdAt) }}
+                {{ $t("pages.zaiavka_list.from") }}
+                {{ toLocaleDate(zaiavka.createdAt) }}
               </ion-col>
             </ion-row>
           </ion-grid>
@@ -49,13 +49,13 @@
 </template>
 
 <script setup lang="ts">
-  import Zayavka from "@/models/zayavka";
-  import { useZayavkaStore } from "@/store/zayavka";
+  import Zaiavka from "@/models/zaiavka";
+  import { useZaiavkaStore } from "@/store/zaiavka";
   import { StoredMaterialRequestDTO } from "@/types/dto";
   import { RefresherCustomEvent } from "@ionic/vue";
   import { onMounted, ref } from "vue";
   import { useRoute, useRouter } from "vue-router";
-  const store = useZayavkaStore();
+  const store = useZaiavkaStore();
   const route = useRoute();
   const router = useRouter();
 
@@ -65,7 +65,7 @@
   }
 
   function openItem(id: StoredMaterialRequestDTO["id"]) {
-    router.push({ name: "zayavka", params: { zayavka: id } });
+    router.push({ name: "zaiavka", params: { zaiavka: id } });
   }
 
   const materialRequests = ref<StoredMaterialRequestDTO[]>([]);
@@ -75,7 +75,7 @@
 
     if (materialRequests.value.length) return;
 
-    const materialRequestsDTO = await Zayavka.findAll();
+    const materialRequestsDTO = await Zaiavka.findAll();
     store.define(materialRequestsDTO);
     materialRequests.value = store.getAll();
   });

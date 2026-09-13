@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { MaterialRequestDTO, StoredMaterialRequestDTO } from "@/types/dto";
 
-export const useZayavkaStore = defineStore("materialRequests", {
+export const useZaiavkaStore = defineStore("materialRequests", {
   state: () => {
     return {} as Record<MaterialRequestDTO["id"], MaterialRequestDTO>;
   },
@@ -11,13 +11,13 @@ export const useZayavkaStore = defineStore("materialRequests", {
     },
 
     getMaterialRequest(
-      id: MaterialRequestDTO["id"]
+      id: MaterialRequestDTO["id"],
     ): StoredMaterialRequestDTO | undefined {
-      const zayavka = this.$state[id];
+      const zaiavka = this.$state[id];
 
-      if (!zayavka) return;
+      if (!zaiavka) return;
 
-      return Object.assign({}, zayavka, { data: JSON.parse(zayavka.data) });
+      return Object.assign({}, zaiavka, { data: JSON.parse(zaiavka.data) });
     },
 
     getAll(): StoredMaterialRequestDTO[] {

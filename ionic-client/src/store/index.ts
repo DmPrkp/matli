@@ -1,6 +1,6 @@
 import { useMainMenuStore } from "./mainMenu";
 import { usePreloader } from "./preloader";
-import { useZayavkaStore } from "./zayavka";
+import { useZaiavkaStore } from "./zaiavka";
 import { useAuthStore } from "./auth";
 
-export { useMainMenuStore, usePreloader, useZayavkaStore, useAuthStore };
+export { useMainMenuStore, usePreloader, useZaiavkaStore, useAuthStore };

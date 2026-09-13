@@ -58,9 +58,9 @@
     name: "main",
     icon: calculatorOutline,
   };
-  const ZAYAVKA = {
-    link: "zayavka",
-    name: "zayavka",
+  const ZAIAVKA = {
+    link: "zaiavka",
+    name: "zaiavka",
     icon: documentsOutline,
   };
   const WAREHOUSES = {
@@ -79,7 +79,7 @@
     // Пока авторизация выключена флагом, вкладку входа не показываем
     // и работаем так, будто пользователь уже вошёл.
     if (!AUTH_ENABLED || authStore.isAuthenticated) {
-      return [CATALOG, MAIN, ZAYAVKA, WAREHOUSES];
+      return [CATALOG, MAIN, ZAIAVKA, WAREHOUSES];
     }
 
     return [CATALOG, AUTH, MAIN];

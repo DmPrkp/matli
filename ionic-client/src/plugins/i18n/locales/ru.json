@@ -1,9 +1,9 @@
 {
-  "title": "Zayavka.ru",
+  "title": "Zaiavka.ru",
   "footer": {
     "main": "Калькулятор",
     "about": "О проекте",
-    "zayavka": "Заявки",
+    "zaiavka": "Заявки",
     "auth": "Войти",
     "catalog": "Сборники",
     "warehouses": "Склады"
@@ -104,7 +104,7 @@
         }
       }
     },
-    "zayavka_list": {
+    "zaiavka_list": {
       "title": "Заявки на материалы",
       "item_title": "Заявка №",
       "from": "от"

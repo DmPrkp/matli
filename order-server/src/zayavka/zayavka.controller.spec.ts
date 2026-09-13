@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ZayavkaController } from './zayavka.controller';
-import { ZayavkaService } from './zayavka.service';
+import { ZaiavkaController } from './zaiavka.controller';
+import { ZaiavkaService } from './zaiavka.service';
 
-describe('ZayavkaController', () => {
-  let controller: ZayavkaController;
-  let service: ZayavkaService;
+describe('ZaiavkaController', () => {
+  let controller: ZaiavkaController;
+  let service: ZaiavkaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ZayavkaController],
+      controllers: [ZaiavkaController],
       providers: [
         {
-          provide: ZayavkaService,
+          provide: ZaiavkaService,
           useValue: {
             create: jest.fn(),
             put: jest.fn(),
@@ -22,8 +22,8 @@ describe('ZayavkaController', () => {
       ],
     }).compile();
 
-    controller = module.get<ZayavkaController>(ZayavkaController);
-    service = module.get<ZayavkaService>(ZayavkaService);
+    controller = module.get<ZaiavkaController>(ZaiavkaController);
+    service = module.get<ZaiavkaService>(ZaiavkaService);
   });
 
   it('should be defined', () => {
@@ -36,15 +36,15 @@ describe('ZayavkaController', () => {
       materials: [],
       power_tools: [],
       system: 'test',
-      user: 1
+      user: 1,
     };
-    
+
     controller.create(mockData);
     expect(service.create).toHaveBeenCalledWith(mockData);
-    
+
     controller.findAll();
     expect(service.getAll).toHaveBeenCalled();
-    
+
     controller.findOne('1');
     expect(service.get).toHaveBeenCalledWith(1);
   });

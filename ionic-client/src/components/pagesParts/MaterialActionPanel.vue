@@ -56,8 +56,8 @@
 </template>
 
 <script setup lang="ts">
-  import Zayavka from "@/models/zayavka";
-  import { useZayavkaStore } from "@/store/zayavka";
+  import Zaiavka from "@/models/zaiavka";
+  import { useZaiavkaStore } from "@/store/zaiavka";
   import { MaterialRequestDTO, ResultMaterialsDTO } from "@/types/dto";
   import {
     logoWhatsapp,
@@ -74,7 +74,7 @@
   }>();
   const route = useRoute();
   const router = useRouter();
-  const store = useZayavkaStore();
+  const store = useZaiavkaStore();
   let orderId: number;
 
   async function save() {
@@ -83,11 +83,11 @@
       ...props.materials,
       system: route.params.system.toString(),
     };
-    const zayavka = new Zayavka(data);
+    const zaiavka = new Zaiavka(data);
     if (orderId) {
-      res = await zayavka.update(orderId, data);
+      res = await zaiavka.update(orderId, data);
     } else {
-      res = await zayavka.create();
+      res = await zaiavka.create();
       orderId = res.id;
     }
 
@@ -101,8 +101,8 @@
   function createFullPath(orderId: number): string {
     const origin = window.location.origin;
     const route = router.resolve({
-      name: "zayavka",
-      params: { zayavka: orderId },
+      name: "zaiavka",
+      params: { zaiavka: orderId },
     });
     return origin + route.fullPath;
   }
@@ -112,8 +112,8 @@
       ...props.materials,
       system: props.system || route.params.system.toString(),
     };
-    const zayavka = new Zayavka(data);
-    await zayavka.generateSheetFile("ods");
+    const zaiavka = new Zaiavka(data);
+    await zaiavka.generateSheetFile("ods");
   }
 
   async function shareOnWhatsApp() {
@@ -145,7 +145,7 @@
     const pageUrl = createFullPath(orderId);
     const message = "Materials to work:"; // Your custom message
     const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(
-      pageUrl
+      pageUrl,
     )}&text=${encodeURIComponent(message)}`;
 
     window.open(telegramUrl, "_blank");

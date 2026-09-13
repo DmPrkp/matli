@@ -22,7 +22,7 @@ export class PowerTool {
   // Add other fields with validation rules
 }
 
-export class CreateZayavkaDto {
+export class CreateZaiavkaDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => HandTool)

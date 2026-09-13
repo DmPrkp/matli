@@ -1,28 +1,28 @@
 import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
-import { ZayavkaService } from './zayavka.service';
-import { CreateZayavkaDto } from '../types/index';
+import { ZaiavkaService } from './zaiavka.service';
+import { CreateZaiavkaDto } from '../types/index';
 
-@Controller('zayavka')
-export class ZayavkaController {
-  constructor(private readonly zayavkaService: ZayavkaService) {}
+@Controller('zaiavka')
+export class ZaiavkaController {
+  constructor(private readonly zaiavkaService: ZaiavkaService) {}
 
   @Post()
-  create(@Body() createZayavkaDto: CreateZayavkaDto) {
-    return this.zayavkaService.create(createZayavkaDto);
+  create(@Body() createZaiavkaDto: CreateZaiavkaDto) {
+    return this.zaiavkaService.create(createZaiavkaDto);
   }
 
   @Put(':id')
-  put(@Param('id') id: string, @Body() createZayavkaDto: CreateZayavkaDto) {
-    return this.zayavkaService.put(Number(id), createZayavkaDto);
+  put(@Param('id') id: string, @Body() createZaiavkaDto: CreateZaiavkaDto) {
+    return this.zaiavkaService.put(Number(id), createZaiavkaDto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.zayavkaService.get(Number(id));
+    return this.zaiavkaService.get(Number(id));
   }
 
   @Get()
   findAll() {
-    return this.zayavkaService.getAll();
+    return this.zaiavkaService.getAll();
   }
 }

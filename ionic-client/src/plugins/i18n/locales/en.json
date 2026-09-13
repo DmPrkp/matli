@@ -1,9 +1,9 @@
 {
-  "title": "Zayavka.ru",
+  "title": "Zaiavka.ru",
   "footer": {
     "main": "Calc",
     "about": "About",
-    "zayavka": "Requests",
+    "zaiavka": "Requests",
     "auth": "Sign in",
     "catalog": "Catalogs",
     "warehouses": "Warehouses"
@@ -104,7 +104,7 @@
         }
       }
     },
-    "zayavka_list": {
+    "zaiavka_list": {
       "title": "Materials requests",
       "item_title": "Materials request #",
       "from": "from"

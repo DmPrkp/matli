@@ -88,15 +88,15 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
-        path: "zayavka",
-        name: "zayavka-list",
-        component: () => import("@/pages/ZayavkaListPage.vue"),
+        path: "zaiavka",
+        name: "zaiavka-list",
+        component: () => import("@/pages/ZaiavkaListPage.vue"),
         meta: { requiresAuth: true },
         children: [
           {
-            path: ":zayavka",
-            name: "zayavka",
-            component: () => import("@/pages/ZayavkaPage.vue"),
+            path: ":zaiavka",
+            name: "zaiavka",
+            component: () => import("@/pages/ZaiavkaPage.vue"),
             meta: { requiresAuth: true },
           },
         ],

@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Zayavka {
+model Zaiavka {
   id    Int      @id @default(autoincrement())
   data  Json
   createdAt  DateTime @default(now())

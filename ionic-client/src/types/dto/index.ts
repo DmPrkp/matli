@@ -1,4 +1,4 @@
-import { ZayavkaType } from "../entity/zayavka";
+import { ZaiavkaType } from "../entity/zaiavka";
 
 export type CalcResponseDTO = {
   id: number;
@@ -75,13 +75,13 @@ export type MaterialRequestDTO = {
 };
 
 export type StoredMaterialRequestDTO = {
-  data: ZayavkaType;
+  data: ZaiavkaType;
   createdAt: string;
   updatedAt: string;
   id: number;
 };
 
-export type { AuthResponse, RegisterPayload, UserProfile } from './auth';
+export type { AuthResponse, RegisterPayload, UserProfile } from "./auth";
 export type {
   DictionaryPage,
   DictionaryUnit,
@@ -91,4 +91,4 @@ export type {
   DictionaryPowerTool,
   DictionaryVariant,
   DictionaryVariantParam,
-} from './dictionary';
+} from "./dictionary";
